@@ -1,0 +1,8 @@
+{
+  "name": "FairShift",
+  "description": "Fair work and worker wellbeing platform supporting construction workers and college support staff with attendance tracking, fair overtime pay calculation, and confidential grievance reporting in English, Tamil, and Hindi.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

@@ -1,0 +1,139 @@
+{
+  "entities": {
+    "Admin": {
+      "title": "Admin",
+      "description": "Registered administrator or site manager authorized to inspect attendance and resolve grievances.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128 },
+        "email": { "type": "string", "maxLength": 256 },
+        "role": { "type": "string", "enum": ["admin", "employer", "supervisor"] },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["uid", "email", "role"]
+    },
+    "WorkerProfile": {
+      "title": "WorkerProfile",
+      "description": "Worker personnel profile including trade, hourly wage, and industry assignment.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 128 },
+        "industry": { "type": "string", "enum": ["construction", "college_support"] },
+        "role": { "type": "string", "maxLength": 128 },
+        "hourlyRate": { "type": "number" },
+        "overtimeRate": { "type": "number" },
+        "badgeId": { "type": "string", "maxLength": 64 },
+        "phone": { "type": "string", "maxLength": 32 },
+        "currentSite": { "type": "string", "maxLength": 128 },
+        "avatarColor": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "name", "industry", "role", "hourlyRate", "overtimeRate", "badgeId"]
+    },
+    "ShiftRecord": {
+      "title": "ShiftRecord",
+      "description": "Shift attendance log with punch times, regular/overtime duration, and fair pay calculations.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "workerId": { "type": "string", "maxLength": 128 },
+        "workerName": { "type": "string", "maxLength": 128 },
+        "role": { "type": "string", "maxLength": 128 },
+        "industry": { "type": "string", "enum": ["construction", "college_support"] },
+        "date": { "type": "string", "maxLength": 32 },
+        "checkInTime": { "type": "string", "maxLength": 32 },
+        "checkOutTime": { "type": "string", "maxLength": 32 },
+        "checkInTimestamp": { "type": "number" },
+        "checkOutTimestamp": { "type": "number" },
+        "durationMinutes": { "type": "number" },
+        "breakMinutes": { "type": "number" },
+        "regularHours": { "type": "number" },
+        "overtimeHours": { "type": "number" },
+        "status": { "type": "string", "enum": ["active", "on_break", "completed"] },
+        "basePay": { "type": "number" },
+        "overtimePay": { "type": "number" },
+        "hazardAllowance": { "type": "number" },
+        "shiftAllowance": { "type": "number" },
+        "grossPay": { "type": "number" },
+        "siteLocation": { "type": "string", "maxLength": 128 },
+        "verifiedByEmployer": { "type": "boolean" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "workerId", "workerName", "industry", "date", "status"]
+    },
+    "GrievanceTicket": {
+      "title": "GrievanceTicket",
+      "description": "Workplace hazard report or grievance filed either confidentially or 100% anonymously.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 64 },
+        "industry": { "type": "string", "enum": ["construction", "college_support"] },
+        "category": {
+          "type": "string",
+          "enum": [
+            "safety_hazard",
+            "unpaid_wages",
+            "excessive_overtime",
+            "missing_ppe",
+            "harassment",
+            "equipment_fault",
+            "sanitation_issue"
+          ]
+        },
+        "severity": { "type": "string", "enum": ["low", "medium", "high", "critical"] },
+        "isAnonymous": { "type": "boolean" },
+        "workerId": { "type": "string", "maxLength": 128 },
+        "workerName": { "type": "string", "maxLength": 128 },
+        "contactNumber": { "type": "string", "maxLength": 32 },
+        "location": { "type": "string", "maxLength": 128 },
+        "description": { "type": "string", "maxLength": 2048 },
+        "audioDurationSeconds": { "type": "number" },
+        "audioTranscript": { "type": "string", "maxLength": 2048 },
+        "status": { "type": "string", "enum": ["submitted", "in_review", "action_taken", "resolved"] },
+        "employerNote": { "type": "string", "maxLength": 2048 },
+        "resolvedAt": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "industry", "category", "severity", "isAnonymous", "location", "description", "status"]
+    },
+    "GrievanceStatusView": {
+      "title": "GrievanceStatusView",
+      "description": "Public status projection for tracking ticket resolution progress without exposing sensitive incident descriptions or reporter identity.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 64 },
+        "category": { "type": "string", "maxLength": 64 },
+        "status": { "type": "string", "enum": ["submitted", "in_review", "action_taken", "resolved"] },
+        "employerNote": { "type": "string", "maxLength": 2048 },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" },
+        "resolvedAt": { "type": "string" }
+      },
+      "required": ["id", "category", "status"]
+    }
+  },
+  "firestore": {
+    "/admins/{uid}": {
+      "schema": "Admin",
+      "description": "Whitelist of verified supervisors and employers authorized for workforce review."
+    },
+    "/workers/{workerId}": {
+      "schema": "WorkerProfile",
+      "description": "Worker personnel records with industry assignment and compensation metrics."
+    },
+    "/shifts/{shiftId}": {
+      "schema": "ShiftRecord",
+      "description": "Real-time shift punches, working durations, and overtime pay computations."
+    },
+    "/grievances/{ticketId}": {
+      "schema": "GrievanceTicket",
+      "description": "Confidential hazard reports and grievances accessible only to authorized supervisors."
+    },
+    "/grievance_status/{ticketId}": {
+      "schema": "GrievanceStatusView",
+      "description": "Publicly trackable resolution status and supervisor note for workers holding a valid Tracking ID."
+    }
+  }
+}

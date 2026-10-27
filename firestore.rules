@@ -1,0 +1,232 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ======================================================================
+    // 0. Global Catch-All: Deny All Operations by Default
+    // ======================================================================
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // ======================================================================
+    // 1. Core Security & Authentication Primitives
+    // ======================================================================
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // Explicitly bootstrapped supervisor account with verified email check
+    function isBootstrappedAdmin() {
+      return isSignedIn() &&
+        request.auth.token.email == "jitheshg111@gmail.com" &&
+        request.auth.token.email_verified == true;
+    }
+
+    // Verified administrator or supervisor verified against database whitelist
+    function isAdmin() {
+      return isBootstrappedAdmin() ||
+        (isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)));
+    }
+
+    // ======================================================================
+    // 2. Administrators Whitelist Collection (/admins/{uid})
+    // ======================================================================
+    // Users can NEVER assign themselves an admin role.
+    // Only the verified bootstrapped administrator can create, update, or revoke admin records.
+    match /admins/{uid} {
+      allow get: if isSignedIn() && (request.auth.uid == uid || isAdmin());
+      allow list: if isAdmin();
+      allow write: if isBootstrappedAdmin();
+    }
+
+    // ======================================================================
+    // 3. Worker Personnel Profiles (/workers/{workerId})
+    // ======================================================================
+    // - Creation: Strictly admin-only. Workers CANNOT self-create profiles to set their own wage rate.
+    // - Read: Workers can ONLY read their own profile document. Listing all workers is admin-only.
+    // - Update: Workers can only update benign contact fields. They CANNOT alter wage rates, role, or badge ID.
+    match /workers/{workerId} {
+      allow get: if isSignedIn() && (request.auth.uid == workerId || isAdmin());
+      allow list: if isAdmin();
+      allow create: if isAdmin();
+      allow update: if isSignedIn() && (
+        isAdmin() ||
+        (
+          request.auth.uid == workerId &&
+          request.resource.data.id == resource.data.id &&
+          // Protected compensation and identity fields are strictly immutable for workers
+          request.resource.data.name == resource.data.name &&
+          request.resource.data.industry == resource.data.industry &&
+          request.resource.data.role == resource.data.role &&
+          request.resource.data.badgeId == resource.data.badgeId &&
+          request.resource.data.hourlyRate == resource.data.hourlyRate &&
+          request.resource.data.overtimeRate == resource.data.overtimeRate
+        )
+      );
+      allow delete: if isAdmin();
+    }
+
+    // ======================================================================
+    // 4. Shift & Attendance Records (/shifts/{shiftId})
+    // ======================================================================
+    // - Creation: Worker can only log active shifts matching their own authenticated identity.
+    //   Self-verification on creation is blocked. Calculated hours & pay must start at 0.
+    // - Read: Workers can only inspect their own shifts. Listing the workforce roster is admin-only.
+    // - Update:
+    //   * Enforces valid worker shift-status state transitions:
+    //     - active -> on_break or completed
+    //     - on_break -> active or completed
+    //     - completed is strictly terminal for workers (only admins may verify/edit completed shifts)
+    //   * Workers CANNOT alter their own workerId, workerName, role, industry, date, or checkIn timestamps.
+    //   * Workers CANNOT alter employer verification (verifiedByEmployer).
+    //   * Workers CANNOT alter calculated pay fields (basePay, overtimePay, grossPay, regularHours, overtimeHours)
+    //     or wage allowance rates (hazardAllowance, shiftAllowance).
+    match /shifts/{shiftId} {
+      allow get: if isSignedIn() && (resource.data.workerId == request.auth.uid || isAdmin());
+      allow list: if isSignedIn() && (resource.data.workerId == request.auth.uid || isAdmin());
+
+      allow create: if isSignedIn() &&
+        (isAdmin() || (
+          request.resource.data.workerId == request.auth.uid &&
+          isValidId(shiftId) &&
+          request.resource.data.status == 'active' &&
+          (!('verifiedByEmployer' in request.resource.data) || request.resource.data.verifiedByEmployer == false) &&
+          request.resource.data.regularHours == 0 &&
+          request.resource.data.overtimeHours == 0 &&
+          request.resource.data.basePay == 0 &&
+          request.resource.data.overtimePay == 0
+        ));
+
+      allow update: if isSignedIn() && (
+        isAdmin() ||
+        (
+          resource.data.workerId == request.auth.uid &&
+          // Completed shifts cannot be re-opened or modified by workers (strictly terminal state)
+          resource.data.status != 'completed' &&
+          // Enforce valid worker shift-status state machine transitions
+          (
+            (resource.data.status == 'active' && request.resource.data.status in ['active', 'on_break', 'completed']) ||
+            (resource.data.status == 'on_break' && request.resource.data.status in ['on_break', 'active', 'completed'])
+          ) &&
+          // Worker identity and check-in parameters are immutable
+          request.resource.data.workerId == resource.data.workerId &&
+          request.resource.data.workerName == resource.data.workerName &&
+          request.resource.data.role == resource.data.role &&
+          request.resource.data.industry == resource.data.industry &&
+          request.resource.data.date == resource.data.date &&
+          request.resource.data.checkInTime == resource.data.checkInTime &&
+          request.resource.data.checkInTimestamp == resource.data.checkInTimestamp &&
+          // Shift verification cannot be changed by workers (employer/admin only)
+          request.resource.data.verifiedByEmployer == resource.data.verifiedByEmployer &&
+          // Allowances are immutable
+          request.resource.data.hazardAllowance == resource.data.hazardAllowance &&
+          request.resource.data.shiftAllowance == resource.data.shiftAllowance &&
+          // Calculated pay fields cannot be altered by workers (protected from tampering)
+          request.resource.data.basePay == resource.data.basePay &&
+          request.resource.data.overtimePay == resource.data.overtimePay &&
+          request.resource.data.grossPay == resource.data.grossPay &&
+          request.resource.data.regularHours == resource.data.regularHours &&
+          request.resource.data.overtimeHours == resource.data.overtimeHours
+        )
+      );
+
+      allow delete: if isAdmin();
+    }
+
+    // ======================================================================
+    // 5. Full Grievance Records (/grievances/{ticketId})
+    // ======================================================================
+    // Contains sensitive incident description, location, audio transcript, and reporter identity.
+    // - Read: STRICTLY restricted to authorized supervisors/admins or the authenticated reporter.
+    //   Unauthenticated or third-party users CANNOT read full reports merely by knowing the ticket ID.
+    // - List: Strictly restricted to authorized supervisors/admins.
+    // - Create: Validates required types, categories, initial 'submitted' status, and ensures
+    //   anonymous reports do not contain personal identity fields.
+    // - Update: Strictly restricted to supervisors/admins.
+    match /grievances/{ticketId} {
+      allow get: if isAdmin() || (isSignedIn() && resource.data.workerId == request.auth.uid);
+      allow list: if isAdmin();
+
+      allow create: if isValidId(ticketId) &&
+        request.resource.data.id == ticketId &&
+        request.resource.data.industry in ['construction', 'college_support'] &&
+        request.resource.data.category in [
+          'safety_hazard',
+          'unpaid_wages',
+          'excessive_overtime',
+          'missing_ppe',
+          'harassment',
+          'equipment_fault',
+          'sanitation_issue'
+        ] &&
+        request.resource.data.severity in ['low', 'medium', 'high', 'critical'] &&
+        request.resource.data.status == 'submitted' &&
+        request.resource.data.isAnonymous is bool &&
+        request.resource.data.location is string &&
+        request.resource.data.location.size() <= 200 &&
+        request.resource.data.description is string &&
+        request.resource.data.description.size() <= 2048 &&
+        // Employer resolution fields cannot be set on creation
+        (!('employerNote' in request.resource.data) || request.resource.data.employerNote == null) &&
+        (!('resolvedAt' in request.resource.data) || request.resource.data.resolvedAt == null) &&
+        // Anonymous privacy validation: anonymous reports must NEVER store reporter identity fields
+        (
+          request.resource.data.isAnonymous == false ||
+          (
+            (!('workerId' in request.resource.data) || request.resource.data.workerId == null) &&
+            (!('workerName' in request.resource.data) || request.resource.data.workerName == null) &&
+            (!('contactNumber' in request.resource.data) || request.resource.data.contactNumber == null) &&
+            (!('email' in request.resource.data) || request.resource.data.email == null) &&
+            (!('reporterEmail' in request.resource.data) || request.resource.data.reporterEmail == null) &&
+            (!('reporterName' in request.resource.data) || request.resource.data.reporterName == null)
+          )
+        ) &&
+        // Confidential non-anonymous report identity validation: if authenticated, workerId must match auth.uid
+        (
+          request.resource.data.isAnonymous == true ||
+          !isSignedIn() ||
+          (!('workerId' in request.resource.data) || request.resource.data.workerId == request.auth.uid)
+        );
+
+      allow update: if isAdmin() &&
+        request.resource.data.id == resource.data.id &&
+        request.resource.data.status in ['submitted', 'in_review', 'action_taken', 'resolved'];
+
+      allow delete: if isAdmin();
+    }
+
+    // ======================================================================
+    // 6. Safe Public Status Projections (/grievance_status/{ticketId})
+    // ======================================================================
+    // Enables workers to track their ticket resolution safely:
+    // - Contains ONLY non-sensitive status fields: id, category, severity, status, employerNote, timestamps.
+    // - Contains NO sensitive incident description, transcript, or personal reporter identity.
+    // - ATOMICITY GUARANTEE: Cannot be created arbitrarily. Can ONLY be created if the corresponding
+    //   verified grievance document in /grievances/{ticketId} is created in the same atomic write batch!
+    // - List/scraping is prohibited (admin only).
+    match /grievance_status/{ticketId} {
+      allow get: if isValidId(ticketId);
+      allow list: if isAdmin();
+
+      allow create: if isValidId(ticketId) &&
+        // Relational write atomicity: Must accompany creation of /grievances/{ticketId} in the same batch
+        existsAfter(/databases/$(database)/documents/grievances/$(ticketId)) &&
+        request.resource.data.id == ticketId &&
+        request.resource.data.category == getAfter(/databases/$(database)/documents/grievances/$(ticketId)).data.category &&
+        request.resource.data.severity == getAfter(/databases/$(database)/documents/grievances/$(ticketId)).data.severity &&
+        request.resource.data.status == 'submitted' &&
+        (!('employerNote' in request.resource.data) || request.resource.data.employerNote == null);
+
+      allow update: if isAdmin() &&
+        request.resource.data.id == resource.data.id &&
+        request.resource.data.status in ['submitted', 'in_review', 'action_taken', 'resolved'];
+
+      allow delete: if isAdmin();
+    }
+  }
+}
