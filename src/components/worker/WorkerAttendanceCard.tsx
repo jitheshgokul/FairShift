@@ -169,23 +169,24 @@ export const WorkerAttendanceCard: React.FC<WorkerAttendanceCardProps> = ({
 
           {/* Location Selector */}
           <div className="pt-1">
-            <label className="block text-xs font-bold text-slate-600 mb-1.5">
+            <label htmlFor="site-location-select" className="block text-xs font-bold text-slate-600 mb-1.5">
               <span className="flex items-center gap-1.5">
-                <MapPin className="w-3.5 h-3.5 text-blue-600" />
+                <MapPin className="w-3.5 h-3.5 text-blue-600" aria-hidden="true" />
                 {t.selectSite}
               </span>
             </label>
             {isCheckedIn ? (
               <div className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-100 text-slate-800 text-sm font-medium border border-slate-200">
-                <MapPin className="w-4 h-4 text-blue-600 shrink-0" />
+                <MapPin className="w-4 h-4 text-blue-600 shrink-0" aria-hidden="true" />
                 <span className="font-semibold">{activeShift?.siteLocation || selectedLocation}</span>
               </div>
             ) : (
               <select
+                id="site-location-select"
                 value={selectedLocation}
                 onChange={(e) => setSelectedLocation(e.target.value)}
                 aria-label={t.selectSite}
-                className="w-full max-w-md px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-medium text-slate-800 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                className="w-full max-w-md px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-medium text-slate-800 bg-white focus:ring-2 focus:ring-[#123B35] focus-visible:ring-2 focus-visible:ring-[#123B35] focus:outline-none"
               >
                 {locations.map((loc) => (
                   <option key={loc} value={loc}>
@@ -203,9 +204,9 @@ export const WorkerAttendanceCard: React.FC<WorkerAttendanceCardProps> = ({
             <button
               type="button"
               onClick={() => onCheckIn(selectedLocation)}
-              className="w-full min-h-[58px] px-6 py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-bold text-lg flex items-center justify-center gap-3 shadow-lg shadow-emerald-600/25 transition-all cursor-pointer"
+              className="w-full min-h-[58px] px-6 py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-bold text-lg flex items-center justify-center gap-3 shadow-lg shadow-emerald-600/25 transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2 focus-visible:outline-none"
             >
-              <Play className="w-6 h-6 fill-current" />
+              <Play className="w-6 h-6 fill-current" aria-hidden="true" />
               <span>{t.checkIn}</span>
             </button>
           ) : (
@@ -214,9 +215,9 @@ export const WorkerAttendanceCard: React.FC<WorkerAttendanceCardProps> = ({
               <button
                 type="button"
                 onClick={onCheckOut}
-                className="w-full min-h-[58px] px-6 py-4 rounded-2xl bg-rose-600 hover:bg-rose-700 active:scale-[0.98] text-white font-bold text-lg flex items-center justify-center gap-3 shadow-lg shadow-rose-600/25 transition-all cursor-pointer"
+                className="w-full min-h-[58px] px-6 py-4 rounded-2xl bg-rose-600 hover:bg-rose-700 active:scale-[0.98] text-white font-bold text-lg flex items-center justify-center gap-3 shadow-lg shadow-rose-600/25 transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-rose-600 focus-visible:ring-offset-2 focus-visible:outline-none"
               >
-                <Square className="w-6 h-6 fill-current" />
+                <Square className="w-6 h-6 fill-current" aria-hidden="true" />
                 <span>{t.checkOut}</span>
               </button>
 
@@ -224,13 +225,13 @@ export const WorkerAttendanceCard: React.FC<WorkerAttendanceCardProps> = ({
               <button
                 type="button"
                 onClick={onToggleBreak}
-                className={`w-full min-h-[48px] px-4 py-2.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 border transition-all cursor-pointer ${
+                className={`w-full min-h-[48px] px-4 py-2.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 border transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-[#123B35] focus-visible:ring-offset-2 focus-visible:outline-none ${
                   isOnBreak
                     ? 'bg-amber-600 text-white border-amber-600 hover:bg-amber-700'
                     : 'bg-slate-100 text-slate-800 border-slate-200 hover:bg-slate-200'
                 }`}
               >
-                <Coffee className="w-4 h-4" />
+                <Coffee className="w-4 h-4" aria-hidden="true" />
                 <span>{isOnBreak ? t.resumeWork : t.takeBreak}</span>
               </button>
             </>

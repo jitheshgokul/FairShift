@@ -27,8 +27,3 @@ Thumbs.db
 # Secrets and environment files
 .env*
 !.env.example
-
-node_modules/
-dist/
-.env
-.env.*

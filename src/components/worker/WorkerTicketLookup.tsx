@@ -94,22 +94,28 @@ export const WorkerTicketLookup: React.FC<WorkerTicketLookupProps> = ({
 
       {/* Search Input Bar */}
       <form onSubmit={handleSearch} className="mt-5">
+        <label htmlFor="ticket-id-search" className="sr-only">
+          {t.enterTrackingId}
+        </label>
         <div className="flex flex-col sm:flex-row gap-2.5">
           <div className="relative flex-1">
-            <Search className="w-5 h-5 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <Search className="w-5 h-5 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" aria-hidden="true" />
             <input
+              id="ticket-id-search"
               type="text"
               value={searchId}
               onChange={(e) => setSearchId(e.target.value)}
               placeholder={t.enterTrackingId}
-              className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-300 text-sm font-bold uppercase tracking-wider text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              aria-label={t.enterTrackingId}
+              className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-300 text-sm font-bold uppercase tracking-wider text-slate-800 focus:ring-2 focus:ring-[#123B35] focus-visible:ring-2 focus-visible:ring-[#123B35] focus:outline-none"
             />
           </div>
           <button
             type="submit"
-            className="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold text-xs transition-all flex items-center justify-center gap-2 shadow-sm min-h-[44px] cursor-pointer"
+            aria-label={t.lookupButton}
+            className="px-6 py-3 rounded-xl bg-[#123B35] hover:bg-[#1A524A] active:scale-95 text-white font-bold text-xs transition-all flex items-center justify-center gap-2 shadow-sm min-h-[44px] cursor-pointer focus-visible:ring-2 focus-visible:ring-[#123B35] focus-visible:ring-offset-2 focus-visible:outline-none"
           >
-            <Search className="w-4 h-4" />
+            <Search className="w-4 h-4" aria-hidden="true" />
             <span>{t.lookupButton}</span>
           </button>
         </div>
@@ -121,11 +127,12 @@ export const WorkerTicketLookup: React.FC<WorkerTicketLookupProps> = ({
             <button
               key={id}
               type="button"
+              aria-label={`Fill sample ticket ${id}`}
               onClick={() => {
                 setSearchId(id);
                 handleSearch(undefined, id);
               }}
-              className="px-2 py-0.5 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 font-mono font-semibold transition-colors cursor-pointer"
+              className="px-2 py-0.5 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 font-mono font-semibold transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-[#123B35] focus-visible:outline-none"
             >
               {id}
             </button>
@@ -133,9 +140,9 @@ export const WorkerTicketLookup: React.FC<WorkerTicketLookupProps> = ({
         </div>
       </form>
 
-      {/* Results View */}
+      {/* Results View with Live Region for Screen Readers */}
       {hasSearched && (
-        <div className="mt-6 pt-6 border-t border-slate-100">
+        <div aria-live="polite" className="mt-6 pt-6 border-t border-slate-100">
           {foundTicket ? (
             <div className="space-y-6 animate-in fade-in duration-200">
               {/* Ticket Summary Header */}

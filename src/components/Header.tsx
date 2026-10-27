@@ -59,11 +59,12 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               type="button"
               onClick={onNavigateWelcome}
-              className="flex items-center gap-3 text-left group cursor-pointer focus:outline-none"
+              aria-label="FairShift home, return to welcome screen"
+              className="flex items-center gap-3 text-left group cursor-pointer focus-visible:ring-2 focus-visible:ring-[#123B35] focus-visible:ring-offset-2 focus-visible:outline-none rounded-xl p-1"
               title="Return to Welcome Screen"
             >
               <div className="w-10 h-10 rounded-xl bg-[#123B35] flex items-center justify-center text-white shadow-md shadow-[#123B35]/20 group-hover:bg-[#1A524A] transition-all">
-                <Scale className="w-5 h-5 text-emerald-300" />
+                <Scale className="w-5 h-5 text-emerald-300" aria-hidden="true" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
@@ -73,12 +74,12 @@ export const Header: React.FC<HeaderProps> = ({
                   {/* Verified Role Badge */}
                   {isUserAdmin ? (
                     <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#123B35] text-white shadow-xs">
-                      <Briefcase className="w-3 h-3 text-emerald-300" />
+                      <Briefcase className="w-3 h-3 text-emerald-300" aria-hidden="true" />
                       <span>{t.employerDashboard}</span>
                     </span>
                   ) : (
                     <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#EBF2F0] text-[#123B35] border border-[#2D7B70]/30">
-                      <UserCheck className="w-3 h-3 text-[#22645B]" />
+                      <UserCheck className="w-3 h-3 text-[#22645B]" aria-hidden="true" />
                       <span>{t.workerPortal}</span>
                     </span>
                   )}
@@ -88,38 +89,40 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           {/* Zone 2: Industry Switcher */}
-          <div className="flex items-center gap-2 shrink-0">
-            <div className="flex items-center p-1 bg-[#EFF1EB] rounded-xl border border-[#DDE2D7]">
+          <nav aria-label="Industry Sector Selection" className="flex items-center gap-2 shrink-0">
+            <div className="flex items-center p-1 bg-[#EFF1EB] rounded-xl border border-[#DDE2D7]" role="group" aria-label="Select industry sector">
               <button
                 type="button"
                 onClick={() => onIndustryChange('construction')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap min-h-[34px] ${
+                aria-pressed={currentIndustry === 'construction'}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap min-h-[34px] focus-visible:ring-2 focus-visible:ring-[#123B35] focus-visible:outline-none ${
                   currentIndustry === 'construction'
                     ? 'bg-[#123B35] text-white shadow-xs font-bold'
                     : 'text-[#123B35] hover:text-black'
                 }`}
                 title={t.constructionIndustry}
               >
-                <HardHat className="w-3.5 h-3.5 text-amber-300" />
+                <HardHat className="w-3.5 h-3.5 text-amber-300" aria-hidden="true" />
                 <span className="hidden sm:inline">{t.constructionIndustry}</span>
                 <span className="sm:hidden">Construction</span>
               </button>
               <button
                 type="button"
                 onClick={() => onIndustryChange('college_support')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap min-h-[34px] ${
+                aria-pressed={currentIndustry === 'college_support'}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap min-h-[34px] focus-visible:ring-2 focus-visible:ring-[#123B35] focus-visible:outline-none ${
                   currentIndustry === 'college_support'
                     ? 'bg-[#123B35] text-white shadow-xs font-bold'
                     : 'text-[#123B35] hover:text-black'
                 }`}
                 title={t.collegeIndustry}
               >
-                <Building2 className="w-3.5 h-3.5 text-emerald-300" />
+                <Building2 className="w-3.5 h-3.5 text-emerald-300" aria-hidden="true" />
                 <span className="hidden sm:inline">{t.collegeIndustry}</span>
                 <span className="sm:hidden">College Staff</span>
               </button>
             </div>
-          </div>
+          </nav>
 
           {/* Zone 3: Language, Profile Switcher & Auth Controls */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
@@ -186,19 +189,21 @@ export const Header: React.FC<HeaderProps> = ({
                 <button
                   type="button"
                   onClick={onSignOut}
+                  aria-label="Sign Out"
                   title="Sign Out"
-                  className="p-1 text-slate-500 hover:text-rose-600 transition-colors cursor-pointer ml-1"
+                  className="p-1 text-slate-500 hover:text-rose-600 transition-colors cursor-pointer ml-1 focus-visible:ring-2 focus-visible:ring-rose-600 focus-visible:outline-none rounded-md"
                 >
-                  <LogOut className="w-3.5 h-3.5" />
+                  <LogOut className="w-3.5 h-3.5" aria-hidden="true" />
                 </button>
               </div>
             ) : (
               <button
                 type="button"
                 onClick={onSignInGoogle}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#123B35] hover:bg-[#1A524A] text-white font-semibold text-xs transition-all shadow-xs cursor-pointer min-h-[34px]"
+                aria-label="Sign in with Google"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#123B35] hover:bg-[#1A524A] text-white font-semibold text-xs transition-all shadow-xs cursor-pointer min-h-[34px] focus-visible:ring-2 focus-visible:ring-[#123B35] focus-visible:ring-offset-2 focus-visible:outline-none"
               >
-                <LogIn className="w-3.5 h-3.5" />
+                <LogIn className="w-3.5 h-3.5" aria-hidden="true" />
                 <span className="hidden sm:inline">Google Sign In</span>
                 <span className="sm:hidden">Sign In</span>
               </button>
@@ -208,10 +213,11 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               type="button"
               onClick={onResetDemo}
+              aria-label={t.resetDemoData}
               title={t.resetDemoData}
-              className="p-2 rounded-xl text-slate-500 hover:text-[#123B35] hover:bg-[#EFF1EB] active:scale-95 transition-all min-w-[34px] min-h-[34px] flex items-center justify-center"
+              className="p-2 rounded-xl text-slate-500 hover:text-[#123B35] hover:bg-[#EFF1EB] active:scale-95 transition-all min-w-[34px] min-h-[34px] flex items-center justify-center focus-visible:ring-2 focus-visible:ring-[#123B35] focus-visible:outline-none cursor-pointer"
             >
-              <RotateCcw className="w-4 h-4" />
+              <RotateCcw className="w-4 h-4" aria-hidden="true" />
             </button>
           </div>
         </div>

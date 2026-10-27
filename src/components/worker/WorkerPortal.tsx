@@ -75,64 +75,82 @@ export const WorkerPortal: React.FC<WorkerPortalProps> = ({
         </div>
 
         {/* Worker Navigation Tabs */}
-        <div className="flex items-center gap-1.5 p-1 bg-[#EFF1EB] rounded-xl border border-[#DDE2D7] overflow-x-auto">
-          <button
-            type="button"
-            onClick={() => setActiveTab('shift')}
-            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap min-h-[40px] cursor-pointer ${
-              activeTab === 'shift'
-                ? 'bg-[#123B35] text-white shadow-xs'
-                : 'text-[#123B35] hover:bg-[#DDE2D7]'
-            }`}
-          >
-            <UserCheck className="w-4 h-4" />
-            <span>Shift & Pay</span>
-          </button>
+        <nav aria-label="Worker Portal Navigation">
+          <div role="tablist" aria-label="Worker Portal Tabs" className="flex items-center gap-1.5 p-1 bg-[#EFF1EB] rounded-xl border border-[#DDE2D7] overflow-x-auto">
+            <button
+              id="tab-shift"
+              role="tab"
+              aria-selected={activeTab === 'shift'}
+              aria-controls="panel-shift"
+              type="button"
+              onClick={() => setActiveTab('shift')}
+              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap min-h-[40px] cursor-pointer focus-visible:ring-2 focus-visible:ring-[#123B35] focus-visible:outline-none ${
+                activeTab === 'shift'
+                  ? 'bg-[#123B35] text-white shadow-xs'
+                  : 'text-[#123B35] hover:bg-[#DDE2D7]'
+              }`}
+            >
+              <UserCheck className="w-4 h-4" aria-hidden="true" />
+              <span>Shift & Pay</span>
+            </button>
 
-          <button
-            type="button"
-            onClick={() => setActiveTab('report')}
-            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap min-h-[40px] cursor-pointer ${
-              activeTab === 'report'
-                ? 'bg-[#123B35] text-white shadow-xs'
-                : 'text-[#123B35] hover:bg-[#DDE2D7]'
-            }`}
-          >
-            <ShieldAlert className="w-4 h-4 text-amber-300" />
-            <span>Report Hazard</span>
-          </button>
+            <button
+              id="tab-report"
+              role="tab"
+              aria-selected={activeTab === 'report'}
+              aria-controls="panel-report"
+              type="button"
+              onClick={() => setActiveTab('report')}
+              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap min-h-[40px] cursor-pointer focus-visible:ring-2 focus-visible:ring-[#123B35] focus-visible:outline-none ${
+                activeTab === 'report'
+                  ? 'bg-[#123B35] text-white shadow-xs'
+                  : 'text-[#123B35] hover:bg-[#DDE2D7]'
+              }`}
+            >
+              <ShieldAlert className="w-4 h-4 text-amber-300" aria-hidden="true" />
+              <span>Report Hazard</span>
+            </button>
 
-          <button
-            type="button"
-            onClick={() => setActiveTab('lookup')}
-            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap min-h-[40px] cursor-pointer ${
-              activeTab === 'lookup'
-                ? 'bg-[#123B35] text-white shadow-xs'
-                : 'text-[#123B35] hover:bg-[#DDE2D7]'
-            }`}
-          >
-            <FileSearch className="w-4 h-4" />
-            <span>Track Ticket</span>
-          </button>
+            <button
+              id="tab-lookup"
+              role="tab"
+              aria-selected={activeTab === 'lookup'}
+              aria-controls="panel-lookup"
+              type="button"
+              onClick={() => setActiveTab('lookup')}
+              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap min-h-[40px] cursor-pointer focus-visible:ring-2 focus-visible:ring-[#123B35] focus-visible:outline-none ${
+                activeTab === 'lookup'
+                  ? 'bg-[#123B35] text-white shadow-xs'
+                  : 'text-[#123B35] hover:bg-[#DDE2D7]'
+              }`}
+            >
+              <FileSearch className="w-4 h-4" aria-hidden="true" />
+              <span>Track Ticket</span>
+            </button>
 
-          <button
-            type="button"
-            onClick={() => setActiveTab('history')}
-            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap min-h-[40px] cursor-pointer ${
-              activeTab === 'history'
-                ? 'bg-[#123B35] text-white shadow-xs'
-                : 'text-[#123B35] hover:bg-[#DDE2D7]'
-            }`}
-          >
-            <History className="w-4 h-4" />
-            <span>Receipts</span>
-          </button>
-        </div>
+            <button
+              id="tab-history"
+              role="tab"
+              aria-selected={activeTab === 'history'}
+              aria-controls="panel-history"
+              type="button"
+              onClick={() => setActiveTab('history')}
+              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap min-h-[40px] cursor-pointer focus-visible:ring-2 focus-visible:ring-[#123B35] focus-visible:outline-none ${
+                activeTab === 'history'
+                  ? 'bg-[#123B35] text-white shadow-xs'
+                  : 'text-[#123B35] hover:bg-[#DDE2D7]'
+              }`}
+            >
+              <History className="w-4 h-4" aria-hidden="true" />
+              <span>Receipts</span>
+            </button>
+          </div>
+        </nav>
       </div>
 
       {/* Tab 1: Attendance Check-In & Live Pay Breakdown */}
       {activeTab === 'shift' && (
-        <div className="space-y-6">
+        <div id="panel-shift" role="tabpanel" aria-labelledby="tab-shift" className="space-y-6">
           <WorkerAttendanceCard
             worker={worker}
             activeShift={activeShift}
@@ -152,30 +170,36 @@ export const WorkerPortal: React.FC<WorkerPortalProps> = ({
 
       {/* Tab 2: Safety & Grievance Reporting */}
       {activeTab === 'report' && (
-        <WorkerGrievanceForm
-          worker={worker}
-          industry={industry}
-          language={language}
-          onSubmitGrievance={onSubmitGrievance}
-          onViewTicket={handleViewTicketFromSubmit}
-        />
+        <div id="panel-report" role="tabpanel" aria-labelledby="tab-report">
+          <WorkerGrievanceForm
+            worker={worker}
+            industry={industry}
+            language={language}
+            onSubmitGrievance={onSubmitGrievance}
+            onViewTicket={handleViewTicketFromSubmit}
+          />
+        </div>
       )}
 
       {/* Tab 3: Track Existing Ticket */}
       {activeTab === 'lookup' && (
-        <WorkerTicketLookup
-          language={language}
-          initialTicketId={initialLookupId}
-        />
+        <div id="panel-lookup" role="tabpanel" aria-labelledby="tab-lookup">
+          <WorkerTicketLookup
+            language={language}
+            initialTicketId={initialLookupId}
+          />
+        </div>
       )}
 
       {/* Tab 4: Shift Receipts History */}
       {activeTab === 'history' && (
-        <WorkerShiftHistory
-          worker={worker}
-          shifts={allShifts}
-          language={language}
-        />
+        <div id="panel-history" role="tabpanel" aria-labelledby="tab-history">
+          <WorkerShiftHistory
+            worker={worker}
+            shifts={allShifts}
+            language={language}
+          />
+        </div>
       )}
     </div>
   );

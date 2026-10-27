@@ -266,6 +266,14 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#F7F8F4] text-[#123B35] flex flex-col font-sans selection:bg-[#123B35] selection:text-white">
+      {/* Skip to Main Content Link for Keyboard and Screen Reader Accessibility */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-4 focus:py-2 focus:bg-[#123B35] focus:text-white focus:rounded-xl focus:shadow-xl focus:ring-2 focus:ring-emerald-400 font-bold text-xs"
+      >
+        Skip to main content
+      </a>
+
       {/* Top Bar Header */}
       {currentWorker && (
         <Header
@@ -321,7 +329,7 @@ export default function App() {
       </aside>
 
       {/* Main Viewport Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      <main id="main-content" tabIndex={-1} className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 focus:outline-none">
         {currentRole === 'worker' && currentWorker ? (
           <WorkerPortal
             worker={currentWorker}
@@ -347,17 +355,22 @@ export default function App() {
         )}
       </main>
 
-      {/* Toast Notification */}
+      {/* Toast Notification with Live Region for Screen Readers */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 bg-[#123B35] text-white px-4 py-3 rounded-2xl shadow-xl border border-[#2D7B70] flex items-center gap-3 animate-in fade-in slide-in-from-bottom-3 duration-200 text-xs font-semibold">
-          <CheckCircle2 className="w-4 h-4 text-emerald-300 shrink-0" />
+        <div
+          role="status"
+          aria-live="polite"
+          className="fixed bottom-6 right-6 z-50 bg-[#123B35] text-white px-4 py-3 rounded-2xl shadow-xl border border-[#2D7B70] flex items-center gap-3 animate-in fade-in slide-in-from-bottom-3 duration-200 text-xs font-semibold"
+        >
+          <CheckCircle2 className="w-4 h-4 text-emerald-300 shrink-0" aria-hidden="true" />
           <span>{toastMessage}</span>
           <button
             type="button"
             onClick={() => setToastMessage(null)}
-            className="text-slate-300 hover:text-white ml-1 cursor-pointer"
+            aria-label="Dismiss notification"
+            className="text-slate-300 hover:text-white ml-1 cursor-pointer p-1 rounded-md focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
           >
-            <X className="w-3.5 h-3.5" />
+            <X className="w-3.5 h-3.5" aria-hidden="true" />
           </button>
         </div>
       )}
